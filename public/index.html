@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VIONE X | WhatsApp Broadcast</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+      body {
+        background: radial-gradient(circle at top, #0f2027, #203a43, #2c5364);
+        font-family: 'Orbitron', sans-serif;
+        color: #e0e0e0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        overflow: hidden;
+      }
+      h1 {
+        text-shadow: 0 0 25px #00fff7, 0 0 50px #00aaff;
+        margin-bottom: 25px;
+      }
+      form {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(0, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 30px;
+        width: 350px;
+        box-shadow: 0 0 40px rgba(0, 255, 255, 0.3);
+      }
+      label {
+        font-size: 0.9em;
+        color: #9be8ff;
+      }
+      input, textarea {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        padding: 10px;
+        margin-top: 5px;
+        margin-bottom: 15px;
+      }
+      button {
+        width: 100%;
+        background: linear-gradient(90deg, #00f0ff, #007bff);
+        border: none;
+        border-radius: 12px;
+        color: #fff;
+        font-weight: 600;
+        padding: 12px;
+        cursor: pointer;
+        font-size: 1em;
+        transition: 0.2s;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+      }
+      button:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(0,255,255,0.6); }
+      #pairCode {
+        color: #00fff7;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>⚡ VIONE X Broadcast</h1>
+    <form id="form">
+      <label>WhatsApp Group Link</label>
+      <input type="text" id="groupLink" placeholder="https://chat.whatsapp.com/..." required />
+      <label>Message</label>
+      <textarea id="message" rows="3" placeholder="Type your broadcast message..." required></textarea>
+      <label>Enter Your WhatsApp Number</label>
+      <input type="text" id="number" placeholder="+94XXXXXXXXX" required />
+      <button type="button" id="generate">Get Pair Code 🔐</button>
+      <div id="pairCode"></div>
+      <button type="submit">Send Broadcast Message 🚀</button>
+    </form>
+
+    <script>
+      const codeDisplay = document.getElementById("pairCode");
+
+      document.getElementById("generate").addEventListener("click", async () => {
+        const num = document.getElementById("number").value;
+        if (!num) return alert("Please enter your WhatsApp number!");
+        codeDisplay.innerText = "⏳ Generating pair code...";
+        const res = await fetch("/pair", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ number: num }),
+        });
+        const data = await res.json();
+        if (data.pairCode)
+          codeDisplay.innerHTML = `🔑 Pair Code: <b>${data.pairCode}</b><br><small>Enter this in WhatsApp → Linked Devices → Add Device → Enter Code</small>`;
+        else codeDisplay.innerText = data.error || "Error generating code!";
+      });
+
+      document.getElementById("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const res = await fetch("/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            groupLink: document.getElementById("groupLink").value,
+            message: document.getElementById("message").value,
+          }),
+        });
+        const data = await res.json();
+        alert(data.msg || data.error);
+      });
+    </script>
+  </body>
+</html>
